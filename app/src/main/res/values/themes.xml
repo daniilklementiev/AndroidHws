@@ -6,4 +6,8 @@
     </style>
 
     <style name="Theme.Hws" parent="Base.Theme.Hws" />
+    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
 </resources>
