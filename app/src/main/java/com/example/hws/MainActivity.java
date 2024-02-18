@@ -2,122 +2,65 @@ package com.example.hws;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+import java.util.ArrayList;
 
-    private Button[][] buttons = new Button[3][3];
-    private boolean player1Turn = true;
-    private int roundCount;
-    private TextView textViewPlayer1;
-    private TextView textViewPlayer2;
+public class MainActivity extends AppCompatActivity {
+
+    private LinearLayout wishlistLayout;
+    private EditText totalPriceEditText;
+    private ArrayList<Item> items;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        wishlistLayout = findViewById(R.id.wishlist_layout);
+        totalPriceEditText = findViewById(R.id.total_price_edit_text);
 
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                String buttonID = "button_" + i + j;
-                int resID = getResources().getIdentifier(buttonID, "id", getPackageName());
-                buttons[i][j] = findViewById(resID);
-                buttons[i][j].setOnClickListener(this);
+        items = new ArrayList<>();
+
+        // Пример предметов
+        addItem(new Item("Мебель на кухню", 5000));
+        addItem(new Item("Телевизор в спальню", 500));
+        addItem(new Item("Кровать в спальню", 1000));
+    }
+
+    private void addItem(Item item) {
+        items.add(item);
+
+        View itemView = getLayoutInflater().inflate(R.layout.item_layout, null);
+
+        TextView itemNameTextView = itemView.findViewById(R.id.item_name_text_view);
+        TextView itemPriceTextView = itemView.findViewById(R.id.item_price_text_view);
+        CheckBox itemCheckBox = itemView.findViewById(R.id.item_check_box);
+
+        itemNameTextView.setText(item.getName());
+        itemPriceTextView.setText("$" + item.getPrice());
+
+        itemCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            item.setChecked(isChecked);
+            calculateTotalPrice();
+        });
+
+        wishlistLayout.addView(itemView);
+
+        calculateTotalPrice();
+    }
+
+    private void calculateTotalPrice() {
+        int totalPrice = 0;
+        for (Item item : items) {
+            if (item.isChecked()) {
+                totalPrice += item.getPrice();
             }
         }
-    }
-
-    @Override
-    public void onClick(View v) {
-        if (!((Button) v).getText().toString().equals("")) {
-            return;
-        }
-
-        if (player1Turn) {
-            ((Button) v).setText("X");
-        } else {
-            ((Button) v).setText("O");
-        }
-
-        roundCount++;
-
-        if (checkForWin()) {
-            if (player1Turn) {
-                player1Wins();
-            } else {
-                player2Wins();
-            }
-        } else if (roundCount == 9) {
-            draw();
-        } else {
-            player1Turn = !player1Turn;
-        }
-    }
-
-    private boolean checkForWin() {
-        String[][] field = new String[3][3];
-
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                field[i][j] = buttons[i][j].getText().toString();
-            }
-        }
-
-        for (int i = 0; i < 3; i++) {
-            if (field[i][0].equals(field[i][1]) && field[i][0].equals(field[i][2]) && !field[i][0].equals("")) {
-                return true;
-            }
-            if (field[0][i].equals(field[1][i]) && field[0][i].equals(field[2][i]) && !field[0][i].equals("")) {
-                return true;
-            }
-        }
-
-        if (field[0][0].equals(field[1][1]) && field[0][0].equals(field[2][2]) && !field[0][0].equals("")) {
-            return true;
-        }
-        if (field[0][2].equals(field[1][1]) && field[0][2].equals(field[2][0]) && !field[0][2].equals("")) {
-            return true;
-        }
-
-        return false;
-    }
-
-    private void player1Wins() {
-        Toast.makeText(this, "Player 1 wins!", Toast.LENGTH_SHORT).show();
-        updatePointsText();
-        resetBoard();
-    }
-
-    private void player2Wins() {
-        Toast.makeText(this, "Player 2 wins!", Toast.LENGTH_SHORT).show();
-        updatePointsText();
-        resetBoard();
-    }
-
-    private void draw() {
-        Toast.makeText(this, "Draw!", Toast.LENGTH_SHORT).show();
-        resetBoard();
-    }
-
-    private void updatePointsText() {
-        // Метод для обновления счета игроков
-    }
-
-    private void resetBoard() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                buttons[i][j].setText("");
-            }
-        }
-        roundCount = 0;
-        player1Turn = true;
-    }
-
-    private void resetGame() {
-        // Метод для сброса счета игроков и очистки доски
+        totalPriceEditText.setText("$" + totalPrice);
     }
 }
