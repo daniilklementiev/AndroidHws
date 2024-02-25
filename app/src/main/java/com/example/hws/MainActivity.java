@@ -1,13 +1,16 @@
 package com.example.hws;
-import android.content.DialogInterface;
-import android.content.Intent;
-import android.net.Uri;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.RatingBar;
-import android.widget.Toast;
 
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -16,66 +19,28 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        showRatingDialog();
-    }
+        LineChart lineChart = findViewById(R.id.lineChart);
 
-    private void showRatingDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Rate Us What You Think");
+        ArrayList<Entry> bitcoinPrices = new ArrayList<>();
+        bitcoinPrices.add(new Entry(0, 10000)); // Добавьте данные о курсе биткоина за каждый год
+        bitcoinPrices.add(new Entry(1, 15000));
+        bitcoinPrices.add(new Entry(2, 20000));
+        bitcoinPrices.add(new Entry(3, 25000));
+        bitcoinPrices.add(new Entry(4, 30000));
 
-        RatingBar ratingBar = new RatingBar(this);
-        ratingBar.setNumStars(5);
-        ratingBar.setStepSize(1);
+        LineDataSet lineDataSet = new LineDataSet(bitcoinPrices, "Bitcoin Price");
+        lineDataSet.setColor(Color.BLUE);
+        lineDataSet.setValueTextColor(Color.RED);
 
-        builder.setView(ratingBar);
+        LineData lineData = new LineData(lineDataSet);
+        lineChart.setData(lineData);
 
-        builder.setPositiveButton("Submit", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                float rating = ratingBar.getRating();
-                if (rating >= 1 && rating <= 3) {
-                    showFeedbackDialog();
-                } else if (rating > 3 && rating <= 5) {
-                    goToPlayStore();
-                }
-            }
-        });
-
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                dialogInterface.dismiss();
-            }
-        });
-
-        builder.show();
-    }
-
-    private void showFeedbackDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Feedback Dialog");
-        builder.setMessage("Please provide your feedback.");
-
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Toast.makeText(MainActivity.this, "Thank you for your feedback!", Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        builder.show();
-    }
-
-    private void goToPlayStore() {
-        // Замените "your.package.name" на реальный идентификатор вашего приложения в Google Play
-        String appPackageName = "your.package.name";
-        try {
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("market://details?id=" + appPackageName)));
-        } catch (android.content.ActivityNotFoundException e) {
-            startActivity(new Intent(Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=" + appPackageName)));
-        }
+        Description description = new Description();
+        description.setText("Bitcoin Price over 5 years");
+        lineChart.setDescription(description);
+        lineChart.animateXY(2000, 2000);
+        lineChart.invalidate();
     }
 }
+
 
