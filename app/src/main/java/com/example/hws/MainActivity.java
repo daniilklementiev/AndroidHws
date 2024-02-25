@@ -1,46 +1,65 @@
 package com.example.hws;
-import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.data.Entry;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
-
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+
+    private TextView sentenceTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        LineChart lineChart = findViewById(R.id.lineChart);
+        sentenceTextView = findViewById(R.id.sentenceTextView);
+    }
 
-        ArrayList<Entry> bitcoinPrices = new ArrayList<>();
-        bitcoinPrices.add(new Entry(0, 10000)); // Добавьте данные о курсе биткоина за каждый год
-        bitcoinPrices.add(new Entry(1, 15000));
-        bitcoinPrices.add(new Entry(2, 20000));
-        bitcoinPrices.add(new Entry(3, 25000));
-        bitcoinPrices.add(new Entry(4, 30000));
+    public void generateSentence(View view) {
+        String sentence = composeSentence();
+        sentenceTextView.setText(sentence);
+    }
 
-        LineDataSet lineDataSet = new LineDataSet(bitcoinPrices, "Bitcoin Price");
-        lineDataSet.setColor(Color.BLUE);
-        lineDataSet.setValueTextColor(Color.RED);
+    private String composeSentence() {
+        ArrayList<String> parts = new ArrayList<>();
+        parts.add(readFile(R.raw.kto));
+        parts.add(readFile(R.raw.gde));
+        parts.add(readFile(R.raw.kogda));
+        parts.add(readFile(R.raw.s_kem));
+        parts.add(readFile(R.raw.chto_delali));
+        parts.add(readFile(R.raw.chto_sluchilos));
+        parts.add(readFile(R.raw.moral));
 
-        LineData lineData = new LineData(lineDataSet);
-        lineChart.setData(lineData);
+        StringBuilder sentenceBuilder = new StringBuilder();
+        for (String part : parts) {
+            sentenceBuilder.append(part).append(" ");
+        }
+        return sentenceBuilder.toString().trim();
+    }
 
-        Description description = new Description();
-        description.setText("Bitcoin Price over 5 years");
-        lineChart.setDescription(description);
-        lineChart.animateXY(2000, 2000);
-        lineChart.invalidate();
+    private String readFile(int resourceId) {
+        InputStream inputStream = getResources().openRawResource(resourceId);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream));
+        ArrayList<String> lines = new ArrayList<>();
+        String line;
+        try {
+            while ((line = reader.readLine()) != null) {
+                lines.add(line);
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        Random random = new Random();
+        return lines.get(random.nextInt(lines.size()));
     }
 }
-
-
