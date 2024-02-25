@@ -1,35 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:padding="16dp">
+    tools:context=".MainActivity">
 
-    <LinearLayout
-        android:id="@+id/wishlist_layout"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="8dp"
-        android:layout_marginBottom="16dp">
-
-    </LinearLayout>
-
-    <TextView
+    <Button
+        android:id="@+id/show_notification_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Total Price:"
-        android:textSize="18sp"
-        android:layout_marginBottom="8dp"/>
+        android:text="Show Notification"
+        android:onClick="showCustomNotification"
+        android:layout_centerInParent="true"/>
 
-    <EditText
-        android:id="@+id/total_price_edit_text"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:enabled="false"
-        android:inputType="none"
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
-
-</LinearLayout>
+</RelativeLayout>
