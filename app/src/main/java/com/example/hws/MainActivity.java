@@ -125,21 +125,18 @@ public class MainActivity extends AppCompatActivity implements AddContactDialog.
 
     private void addContact(String name, String phone) {
         ArrayList<ContentProviderOperation> operations = new ArrayList<>();
-
-        // Добавляем операцию вставки нового контакта
         ContentProviderOperation.Builder builder = ContentProviderOperation.newInsert(ContactsContract.RawContacts.CONTENT_URI);
         builder.withValue(ContactsContract.RawContacts.ACCOUNT_TYPE, null);
         builder.withValue(ContactsContract.RawContacts.ACCOUNT_NAME, null);
         operations.add(builder.build());
 
-        // Добавляем операцию вставки имени контакта
+
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.StructuredName.CONTENT_ITEM_TYPE);
         builder.withValue(ContactsContract.CommonDataKinds.StructuredName.DISPLAY_NAME, name);
         operations.add(builder.build());
 
-        // Добавляем операцию вставки номера телефона контакта
         builder = ContentProviderOperation.newInsert(ContactsContract.Data.CONTENT_URI);
         builder.withValueBackReference(ContactsContract.Data.RAW_CONTACT_ID, 0);
         builder.withValue(ContactsContract.Data.MIMETYPE, ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE);
@@ -147,7 +144,6 @@ public class MainActivity extends AppCompatActivity implements AddContactDialog.
         operations.add(builder.build());
 
         try {
-            // Применяем все операции одной транзакцией
             getContentResolver().applyBatch(ContactsContract.AUTHORITY, operations);
             Toast.makeText(this, "Contact added successfully", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
