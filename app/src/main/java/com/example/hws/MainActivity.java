@@ -1,66 +1,93 @@
 package com.example.hws;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
-import android.widget.CheckBox;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
+import android.widget.ListView;
+import android.widget.Spinner;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout wishlistLayout;
-    private EditText totalPriceEditText;
-    private ArrayList<Item> items;
+    private Spinner senderSpinner, receiverSpinner;
+    private EditText amountEditText;
+    private Button transferButton, cancelButton;
+    private ListView accountListView;
+
+    private ArrayList<String> accountsList;
+    private ArrayAdapter<String> accountAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        wishlistLayout = findViewById(R.id.wishlist_layout);
-        totalPriceEditText = findViewById(R.id.total_price_edit_text);
+        senderSpinner = findViewById(R.id.senderSpinner);
+        receiverSpinner = findViewById(R.id.receiverSpinner);
+        amountEditText = findViewById(R.id.amountEditText);
+        transferButton = findViewById(R.id.transferButton);
+        cancelButton = findViewById(R.id.cancelButton);
+        accountListView = findViewById(R.id.accountListView);
 
-        items = new ArrayList<>();
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.accounts_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        senderSpinner.setAdapter(adapter);
+        receiverSpinner.setAdapter(adapter);
 
-        // Пример предметов
-        addItem(new Item("Мебель на кухню", 5000));
-        addItem(new Item("Телевизор в спальню", 500));
-        addItem(new Item("Кровать в спальню", 1000));
-    }
+        accountsList = new ArrayList<>();
+        accountsList.add("1: $1000");
+        accountsList.add("2: $2000");
+        accountsList.add("3: $3000");
+        accountsList.add("4: $4000");
 
-    private void addItem(Item item) {
-        items.add(item);
+        accountAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, accountsList);
+        accountListView.setAdapter(accountAdapter);
 
-        View itemView = getLayoutInflater().inflate(R.layout.item_layout, null);
-
-        TextView itemNameTextView = itemView.findViewById(R.id.item_name_text_view);
-        TextView itemPriceTextView = itemView.findViewById(R.id.item_price_text_view);
-        CheckBox itemCheckBox = itemView.findViewById(R.id.item_check_box);
-
-        itemNameTextView.setText(item.getName());
-        itemPriceTextView.setText("$" + item.getPrice());
-
-        itemCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            item.setChecked(isChecked);
-            calculateTotalPrice();
+        transferButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                new TransferTask().execute();
+            }
         });
 
-        wishlistLayout.addView(itemView);
-
-        calculateTotalPrice();
+        cancelButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(MainActivity.this, "Payment canceled", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
-    private void calculateTotalPrice() {
-        int totalPrice = 0;
-        for (Item item : items) {
-            if (item.isChecked()) {
-                totalPrice += item.getPrice();
+    private class TransferTask extends AsyncTask<Void, Void, Void> {
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            try {
+                Thread.sleep(10000);
+                String sender = senderSpinner.getSelectedItem().toString();
+                String receiver = receiverSpinner.getSelectedItem().toString();
+                String amount = amountEditText.getText().toString();
+                accountsList.add(sender + " -> " + receiver + ": $" + amount);
+                accountAdapter.notifyDataSetChanged();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
+            return null;
         }
-        totalPriceEditText.setText("$" + totalPrice);
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            Toast.makeText(MainActivity.this, "Payment transferred", Toast.LENGTH_SHORT).show();
+        }
     }
 }
