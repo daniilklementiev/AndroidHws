@@ -1,66 +1,68 @@
 package com.example.hws;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
-
-import java.util.ArrayList;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
+import twitter4j.Status;
+import twitter4j.Twitter;
+import twitter4j.TwitterException;
+import twitter4j.TwitterFactory;
+import twitter4j.conf.ConfigurationBuilder;
 
 public class MainActivity extends AppCompatActivity {
 
-    private LinearLayout wishlistLayout;
-    private EditText totalPriceEditText;
-    private ArrayList<Item> items;
+    private EditText tweetEditText;
+    private Button tweetButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        wishlistLayout = findViewById(R.id.wishlist_layout);
-        totalPriceEditText = findViewById(R.id.total_price_edit_text);
+        tweetEditText = findViewById(R.id.tweet_edit_text);
+        tweetButton = findViewById(R.id.tweet_button);
 
-        items = new ArrayList<>();
-
-        // Пример предметов
-        addItem(new Item("Мебель на кухню", 5000));
-        addItem(new Item("Телевизор в спальню", 500));
-        addItem(new Item("Кровать в спальню", 1000));
-    }
-
-    private void addItem(Item item) {
-        items.add(item);
-
-        View itemView = getLayoutInflater().inflate(R.layout.item_layout, null);
-
-        TextView itemNameTextView = itemView.findViewById(R.id.item_name_text_view);
-        TextView itemPriceTextView = itemView.findViewById(R.id.item_price_text_view);
-        CheckBox itemCheckBox = itemView.findViewById(R.id.item_check_box);
-
-        itemNameTextView.setText(item.getName());
-        itemPriceTextView.setText("$" + item.getPrice());
-
-        itemCheckBox.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            item.setChecked(isChecked);
-            calculateTotalPrice();
+        tweetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                String tweet = tweetEditText.getText().toString();
+                if (!tweet.isEmpty()) {
+                    new UpdateTwitterStatus().execute(tweet);
+                } else {
+                    Toast.makeText(MainActivity.this, "Введите текст твита", Toast.LENGTH_SHORT).show();
+                }
+            }
         });
-
-        wishlistLayout.addView(itemView);
-
-        calculateTotalPrice();
     }
 
-    private void calculateTotalPrice() {
-        int totalPrice = 0;
-        for (Item item : items) {
-            if (item.isChecked()) {
-                totalPrice += item.getPrice();
+    class UpdateTwitterStatus extends AsyncTask<String, String, String> {
+
+        @Override
+        protected String doInBackground(String... params) {
+            try {
+                ConfigurationBuilder builder = new ConfigurationBuilder();
+                builder.setDebugEnabled(true)
+                        .setOAuthConsumerKey("------")
+                        .setOAuthConsumerSecret("------")
+                        .setOAuthAccessToken("------")
+                        .setOAuthAccessTokenSecret("------");
+
+                Twitter twitter = new TwitterFactory(builder.build()).getInstance();
+                twitter4j.Status status = twitter.updateStatus(params[0]);
+                return status.getText();
+            } catch (TwitterException e) {
+                e.printStackTrace();
+                return "Failed to update status: " + e.getMessage();
             }
         }
-        totalPriceEditText.setText("$" + totalPrice);
+
+        @Override
+        protected void onPostExecute(String result) {
+            Toast.makeText(MainActivity.this, result, Toast.LENGTH_LONG).show();
+        }
     }
 }
